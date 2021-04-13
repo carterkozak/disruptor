@@ -24,23 +24,30 @@ import java.lang.System.Logger.Level;
  */
 public final class IgnoreExceptionHandler implements ExceptionHandler<Object>
 {
-    private static final Logger LOGGER = System.getLogger(IgnoreExceptionHandler.class.getName());
-
     @Override
     public void handleEventException(final Throwable ex, final long sequence, final Object event)
     {
-        LOGGER.log(Level.INFO, () -> "Exception processing: " + sequence + " " + event, ex);
+        LoggerHolder.LOGGER.log(Level.INFO, () -> "Exception processing: " + sequence + " " + event, ex);
     }
 
     @Override
     public void handleOnStartException(final Throwable ex)
     {
-        LOGGER.log(Level.INFO, "Exception during onStart()", ex);
+        LoggerHolder.LOGGER.log(Level.INFO, "Exception during onStart()", ex);
     }
 
     @Override
     public void handleOnShutdownException(final Throwable ex)
     {
-        LOGGER.log(Level.INFO, "Exception during onShutdown()", ex);
+        LoggerHolder.LOGGER.log(Level.INFO, "Exception during onShutdown()", ex);
+    }
+
+    // Initialization-on-demand lazy holder for the logger. This allows IgnoreExceptionHandler to be created
+    // without prematurely initializing logging frameworks.
+    private static final class LoggerHolder
+    {
+        private static final Logger LOGGER = System.getLogger(IgnoreExceptionHandler.class.getName());
+
+        private LoggerHolder() {}
     }
 }

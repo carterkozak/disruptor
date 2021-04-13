@@ -25,12 +25,10 @@ import java.lang.System.Logger.Level;
  */
 public final class FatalExceptionHandler implements ExceptionHandler<Object>
 {
-    private static final Logger LOGGER = System.getLogger(FatalExceptionHandler.class.getName());
-
     @Override
     public void handleEventException(final Throwable ex, final long sequence, final Object event)
     {
-        LOGGER.log(Level.ERROR, () -> "Exception processing: " + sequence + " " + event, ex);
+        LoggerHolder.LOGGER.log(Level.ERROR, () -> "Exception processing: " + sequence + " " + event, ex);
 
         throw new RuntimeException(ex);
     }
@@ -38,12 +36,21 @@ public final class FatalExceptionHandler implements ExceptionHandler<Object>
     @Override
     public void handleOnStartException(final Throwable ex)
     {
-        LOGGER.log(Level.ERROR, "Exception during onStart()", ex);
+        LoggerHolder.LOGGER.log(Level.ERROR, "Exception during onStart()", ex);
     }
 
     @Override
     public void handleOnShutdownException(final Throwable ex)
     {
-        LOGGER.log(Level.ERROR, "Exception during onShutdown()", ex);
+        LoggerHolder.LOGGER.log(Level.ERROR, "Exception during onShutdown()", ex);
+    }
+
+    // Initialization-on-demand lazy holder for the JUL logger. This allows FatalExceptionHandler to be created
+    // without prematurely initializing logging frameworks.
+    private static final class LoggerHolder
+    {
+        private static final Logger LOGGER = System.getLogger(FatalExceptionHandler.class.getName());
+
+        private LoggerHolder() {}
     }
 }
